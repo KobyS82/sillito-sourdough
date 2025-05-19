@@ -1,19 +1,26 @@
-// app/api/order/route.js
-
-import { NextResponse } from 'next/server'
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
 export async function POST(request) {
-  const data = await request.json()
+  const body = await request.json();
+  const { name, quantity } = body;
 
-  console.log('🥖 New Order:', data)
+  try {
+    const order = await prisma.order.create({
+      data: {
+        name,
+        quantity,
+      },
+    });
 
-  return NextResponse.json({ message: 'Order received', received: data })
+    return new Response(JSON.stringify(order), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (err) {
+    console.error(err);
+    return new Response(JSON.stringify({ error: 'Failed to create order' }), {
+      status: 500,
+    });
+  }
 }
-export async function GET(request) {
-  const { searchParams } = new URL(request.url)
-  const orderId = searchParams.get('orderId')
-
-  console.log('🥖 Fetching Order:', orderId)
-
-  return NextResponse.json({ message: 'Order fetched', orderId })
-} 
