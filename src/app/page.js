@@ -5,20 +5,55 @@ import { useState } from 'react'
 export default function Home() {
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState(1)
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false);
+
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+  e.preventDefault();
+  setError('');
+  setSuccess('');
+  setLoading(true);
+  setMessage('Submitting your order...');
 
+  if (!name.trim()) {
+    setError('Please enter your name.');
+    return;
+  }
+
+  if (!quantity || isNaN(quantity) || quantity < 1) {
+    setError('Please enter a valid quantity.');
+    return;
+  }
+
+  try {
     const res = await fetch('/api/order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, quantity }),
-    })
+      body: JSON.stringify({ name, quantity: parseInt(quantity) }),
+    });
 
-    const result = await res.json()
-    setMessage(result.message)
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || 'Something went wrong.');
+    }
+
+    setSuccess('Your order was submitted successfully!');
+    setName('');
+    setQuantity(1);
+  } catch (err) {
+    console.error(err);
+    setError('Failed to submit order. Please try again.');
   }
+  setLoading(false);
+  setMessage(''); // Clear the message after submission
+  setTimeout(() => {
+    setMessage(''); // Clear the message after 3 seconds
+  }, 3000);
+};
+
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-rose-50 p-6">
@@ -51,6 +86,13 @@ export default function Home() {
           >
             Place Order ($12 per loaf)
           </button>
+          {error && (
+            <p style={{ color: 'red', marginTop: '1rem' }}>{error}</p>
+          )}
+
+          {success && (
+            <p style={{ color: 'green', marginTop: '1rem' }}>{success}</p>
+          )}
         </form>
         {message && <p className="text-green-600 text-center">{message}</p>}
       </div>
