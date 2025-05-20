@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
-    "src/app/order/route.js"
+    "src/app/api/order/route.jse.js"
   ],
   "exclude": [
     "node_modules"

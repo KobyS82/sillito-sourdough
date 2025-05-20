@@ -17,6 +17,7 @@ model Order {
   id       Int      @id @default(autoincrement())
   name     String
   email    String?   // <-- now optional
+  plan      String?   // 'weekly' or 'monthly' optional
   quantity Int
   createdAt DateTime @default(now())
 }
